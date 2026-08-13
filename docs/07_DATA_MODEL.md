@@ -21,7 +21,7 @@ Sumber kebenaran skema. Dokumen lain merujuk (`lihat docs/07_DATA_MODEL.md`), ti
 | user_id | uuid | FK -> users.id, UNIQUE, NOT NULL | |
 | nama_usaha | varchar(150) | NOT NULL | |
 | no_ktp_nib | varchar(30) | NOT NULL | PII, akses admin-only |
-| no_rekening | varchar(50) | NOT NULL | dienkripsi at-rest, lihat docs/21 |
+| no_rekening | varchar(255) | NOT NULL | dienkripsi at-rest (AES-256-GCM app-level), lihat docs/21 |
 | persentase_bagi_hasil | numeric(5,2) | NOT NULL, default 85.00 | porsi mitra (%); default sama semua mitra v1 |
 | status_verifikasi | enum('PENDING','AKTIF','REJECTED') | NOT NULL, default 'PENDING' | |
 | created_at | timestamptz | NOT NULL, default now() | |
@@ -33,7 +33,7 @@ Sumber kebenaran skema. Dokumen lain merujuk (`lihat docs/07_DATA_MODEL.md`), ti
 | user_id | uuid | FK -> users.id, UNIQUE, NOT NULL | |
 | nama_usaha | varchar(150) | NOT NULL | |
 | no_ktp_nib | varchar(30) | NOT NULL | PII, akses admin-only |
-| no_rekening | varchar(50) | NOT NULL | dienkripsi at-rest |
+| no_rekening | varchar(255) | NOT NULL | dienkripsi at-rest (AES-256-GCM app-level) |
 | persentase_bagi_hasil | numeric(5,2) | NOT NULL, default 85.00 | porsi mitra (%) |
 | status_verifikasi | enum('PENDING','AKTIF','REJECTED') | NOT NULL, default 'PENDING' | |
 | created_at | timestamptz | NOT NULL, default now() | |
