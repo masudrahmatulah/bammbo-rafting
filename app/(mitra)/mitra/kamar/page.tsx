@@ -4,6 +4,7 @@ import { MitraService } from "@/app/server/services/MitraService";
 import { MitraProdukService } from "@/app/server/services/MitraProdukService";
 import { KamarMitraForm } from "./KamarMitraForm";
 import { toggleOwnKamarAction } from "./actions";
+import { PageHeader, Card, Table, Thead, Th, Tr, Td, EmptyRow, Badge, btnGhost } from "@/app/components/ui";
 
 export default async function MitraKamarPage() {
   const session = await requireMitraPenginapan();
@@ -14,45 +15,46 @@ export default async function MitraKamarPage() {
   const kamar = await MitraProdukService.listOwnKamar(mitra.id);
 
   return (
-    <div className="mx-auto max-w-3xl py-12">
-      <h1 className="text-2xl font-semibold">Kamar Saya</h1>
+    <div className="mx-auto max-w-3xl px-4 py-12">
+      <PageHeader title="Kamar Saya" subtitle="Kelola kamar penginapan milik usaha Anda." />
 
-      <div className="mt-6 rounded-lg border p-4">
+      <Card className="mb-8">
         <KamarMitraForm />
-      </div>
+      </Card>
 
-      <table className="mt-8 w-full text-left text-sm">
-        <thead>
-          <tr className="border-b">
-            <th className="py-2">Nama Kamar</th>
-            <th>Harga/Malam</th>
-            <th>Kapasitas</th>
-            <th>Unit</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
+      <Table>
+        <Thead>
+          <Th>Nama Kamar</Th>
+          <Th>Harga/Malam</Th>
+          <Th>Kapasitas</Th>
+          <Th>Unit</Th>
+          <Th>Status</Th>
+          <Th>Aksi</Th>
+        </Thead>
         <tbody>
           {kamar.map((k) => (
-            <tr key={k.id} className="border-b">
-              <td className="py-2">{k.namaKamar}</td>
-              <td>{Number(k.hargaPerMalam).toLocaleString("id-ID")}</td>
-              <td>{k.kapasitasKamar}</td>
-              <td>{k.jumlahUnit}</td>
-              <td>{k.aktif ? "Aktif" : "Nonaktif"}</td>
-              <td>
+            <Tr key={k.id}>
+              <Td className="font-medium text-slate-900">{k.namaKamar}</Td>
+              <Td>{Number(k.hargaPerMalam).toLocaleString("id-ID")}</Td>
+              <Td>{k.kapasitasKamar}</Td>
+              <Td>{k.jumlahUnit}</Td>
+              <Td>
+                <Badge tone={k.aktif ? "teal" : "slate"}>{k.aktif ? "Aktif" : "Nonaktif"}</Badge>
+              </Td>
+              <Td>
                 <form action={toggleOwnKamarAction}>
                   <input type="hidden" name="kamarId" value={k.id} />
                   <input type="hidden" name="aktif" value={String(k.aktif)} />
-                  <button type="submit" className="text-xs text-emerald-700 underline">
+                  <button type="submit" className={btnGhost}>
                     {k.aktif ? "Nonaktifkan" : "Aktifkan"}
                   </button>
                 </form>
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ))}
+          {kamar.length === 0 && <EmptyRow colSpan={6}>Belum ada kamar.</EmptyRow>}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
 }

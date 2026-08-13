@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { MitraService } from "@/app/server/services/MitraService";
 import { BagiHasilService } from "@/app/server/services/BagiHasilService";
+import { PageHeader, Card, Table, Thead, Th, Tr, Td, EmptyRow, Badge } from "@/app/components/ui";
 
 function formatRupiah(n: { toString(): string }) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(
@@ -14,6 +15,13 @@ const STATUS_LABEL: Record<string, string> = {
   SIAP_CAIR: "Siap Dicairkan",
   CAIR: "Sudah Dicairkan",
   VOID: "Dibatalkan",
+};
+
+const STATUS_TONE: Record<string, "amber" | "teal" | "slate" | "red"> = {
+  PENDING: "slate",
+  SIAP_CAIR: "amber",
+  CAIR: "teal",
+  VOID: "red",
 };
 
 export default async function MitraPendapatanPage() {
@@ -34,41 +42,39 @@ export default async function MitraPendapatanPage() {
   const totalCair = entries.filter((e) => e.status === "CAIR").reduce((sum, e) => sum + Number(e.porsiMitra), 0);
 
   return (
-    <div className="mx-auto max-w-3xl py-12">
-      <h1 className="text-2xl font-semibold">Pendapatan Saya</h1>
-      <p className="mt-1 text-neutral-600">Total sudah dicairkan: {formatRupiah(totalCair)}</p>
+    <div className="mx-auto max-w-3xl px-4 py-12">
+      <PageHeader title="Pendapatan Saya" subtitle="Riwayat porsi bagi hasil dari setiap booking." />
 
-      <table className="mt-6 w-full text-left text-sm">
-        <thead>
-          <tr className="border-b">
-            <th className="py-2">Booking</th>
-            <th>Produk</th>
-            <th>Porsi Saya</th>
-            <th>Status</th>
-          </tr>
-        </thead>
+      <Card className="mb-8">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Sudah Dicairkan</p>
+        <p className="mt-1 text-3xl font-bold text-teal-700">{formatRupiah(totalCair)}</p>
+      </Card>
+
+      <Table>
+        <Thead>
+          <Th>Booking</Th>
+          <Th>Produk</Th>
+          <Th>Porsi Saya</Th>
+          <Th>Status</Th>
+        </Thead>
         <tbody>
           {entries.map((e) => (
-            <tr key={e.id} className="border-b">
-              <td className="py-2 font-mono text-xs">{e.bookingItem.booking.kodeBooking}</td>
-              <td>
+            <Tr key={e.id}>
+              <Td className="font-mono text-xs text-slate-500">{e.bookingItem.booking.kodeBooking}</Td>
+              <Td>
                 {"produkJasa" in e.bookingItem
                   ? (e.bookingItem as { produkJasa?: { nama: string } }).produkJasa?.nama
                   : (e.bookingItem as { kamarPenginapan?: { namaKamar: string } }).kamarPenginapan?.namaKamar}
-              </td>
-              <td>{formatRupiah(e.porsiMitra)}</td>
-              <td>{STATUS_LABEL[e.status] ?? e.status}</td>
-            </tr>
+              </Td>
+              <Td className="font-medium text-slate-900">{formatRupiah(e.porsiMitra)}</Td>
+              <Td>
+                <Badge tone={STATUS_TONE[e.status] ?? "slate"}>{STATUS_LABEL[e.status] ?? e.status}</Badge>
+              </Td>
+            </Tr>
           ))}
-          {entries.length === 0 && (
-            <tr>
-              <td colSpan={4} className="py-4 text-neutral-500">
-                Belum ada pendapatan.
-              </td>
-            </tr>
-          )}
+          {entries.length === 0 && <EmptyRow colSpan={4}>Belum ada pendapatan.</EmptyRow>}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
 }

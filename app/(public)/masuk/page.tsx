@@ -2,8 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import Link from "next/link";
+
+function redirectPathForRole(role: string | undefined) {
+  if (role === "admin") return "/admin";
+  if (role === "mitra_jasa" || role === "mitra_penginapan") return "/mitra";
+  return "/";
+}
 
 export default function MasukPage() {
   const router = useRouter();
@@ -20,39 +26,61 @@ export default function MasukPage() {
       password: formData.get("password"),
       redirect: false,
     });
-    setPending(false);
+
     if (res?.error) {
+      setPending(false);
       setError("Email atau kata sandi salah");
       return;
     }
-    router.push("/");
+
+    const session = await getSession();
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    router.push(redirectPathForRole(role));
     router.refresh();
   }
 
   return (
-    <div className="mx-auto max-w-md py-16">
-      <h1 className="text-2xl font-semibold">Masuk</h1>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium">Email</label>
-          <input id="email" name="email" type="email" required className="mt-1 w-full rounded border px-3 py-2" />
-        </div>
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium">Kata Sandi</label>
-          <input id="password" name="password" type="password" required className="mt-1 w-full rounded border px-3 py-2" />
-        </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={pending}
-          className="w-full rounded bg-emerald-700 py-2 text-white disabled:opacity-50"
-        >
-          {pending ? "Memproses..." : "Masuk"}
-        </button>
-      </form>
-      <p className="mt-4 text-sm text-neutral-600">
-        Belum punya akun? <Link href="/daftar" className="text-emerald-700 underline">Daftar</Link>
-      </p>
+    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16">
+      <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h1 className="text-2xl font-bold text-slate-900">Masuk</h1>
+        <p className="mt-1 text-sm text-slate-500">Masuk ke akun Bammbo Rafting Anda.</p>
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-slate-700">Kata Sandi</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+            />
+          </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <button
+            type="submit"
+            disabled={pending}
+            className="w-full rounded-lg bg-teal-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 disabled:opacity-50"
+          >
+            {pending ? "Memproses..." : "Masuk"}
+          </button>
+        </form>
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Belum punya akun? <Link href="/daftar" className="font-medium text-teal-700 hover:underline">Daftar</Link>
+        </p>
+        <p className="mt-1 text-center text-sm text-slate-500">
+          Ingin jadi mitra? <Link href="/daftar-mitra" className="font-medium text-teal-700 hover:underline">Daftar mitra</Link>
+        </p>
+      </div>
     </div>
   );
 }

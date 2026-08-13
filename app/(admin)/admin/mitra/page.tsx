@@ -1,79 +1,64 @@
 import { requireAdmin } from "@/app/lib/guards";
 import { MitraService } from "@/app/server/services/MitraService";
 import { VerifikasiButtons } from "./VerifikasiButtons";
+import { PageHeader, Table, Thead, Th, Tr, Td, EmptyRow } from "@/app/components/ui";
 
 export default async function AdminMitraPage() {
   await requireAdmin();
   const { jasa, penginapan } = await MitraService.listPending();
 
   return (
-    <div className="mx-auto max-w-4xl py-12">
-      <h1 className="text-2xl font-semibold">Verifikasi Mitra</h1>
+    <div className="mx-auto max-w-4xl px-4 py-12">
+      <PageHeader title="Verifikasi Mitra" subtitle="Tinjau dan setujui/tolak pendaftaran mitra baru." />
 
-      <section className="mt-8">
-        <h2 className="text-lg font-medium">Mitra Jasa (Pending)</h2>
-        <table className="mt-3 w-full text-left text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="py-2">Usaha</th>
-              <th>Penanggung Jawab</th>
-              <th>Email</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Mitra Jasa — Pending</h2>
+        <Table>
+          <Thead>
+            <Th>Usaha</Th>
+            <Th>Penanggung Jawab</Th>
+            <Th>Email</Th>
+            <Th>Aksi</Th>
+          </Thead>
           <tbody>
             {jasa.map((m) => (
-              <tr key={m.id} className="border-b">
-                <td className="py-2">{m.namaUsaha}</td>
-                <td>{m.user.name}</td>
-                <td>{m.user.email}</td>
-                <td>
+              <Tr key={m.id}>
+                <Td className="font-medium text-slate-900">{m.namaUsaha}</Td>
+                <Td>{m.user.name}</Td>
+                <Td>{m.user.email}</Td>
+                <Td>
                   <VerifikasiButtons jenis="jasa" mitraId={m.id} />
-                </td>
-              </tr>
+                </Td>
+              </Tr>
             ))}
-            {jasa.length === 0 && (
-              <tr>
-                <td colSpan={4} className="py-4 text-neutral-500">
-                  Tidak ada pengajuan.
-                </td>
-              </tr>
-            )}
+            {jasa.length === 0 && <EmptyRow colSpan={4}>Tidak ada pengajuan.</EmptyRow>}
           </tbody>
-        </table>
+        </Table>
       </section>
 
       <section className="mt-10">
-        <h2 className="text-lg font-medium">Mitra Penginapan (Pending)</h2>
-        <table className="mt-3 w-full text-left text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="py-2">Usaha</th>
-              <th>Penanggung Jawab</th>
-              <th>Email</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Mitra Penginapan — Pending</h2>
+        <Table>
+          <Thead>
+            <Th>Usaha</Th>
+            <Th>Penanggung Jawab</Th>
+            <Th>Email</Th>
+            <Th>Aksi</Th>
+          </Thead>
           <tbody>
             {penginapan.map((m) => (
-              <tr key={m.id} className="border-b">
-                <td className="py-2">{m.namaUsaha}</td>
-                <td>{m.user.name}</td>
-                <td>{m.user.email}</td>
-                <td>
+              <Tr key={m.id}>
+                <Td className="font-medium text-slate-900">{m.namaUsaha}</Td>
+                <Td>{m.user.name}</Td>
+                <Td>{m.user.email}</Td>
+                <Td>
                   <VerifikasiButtons jenis="penginapan" mitraId={m.id} />
-                </td>
-              </tr>
+                </Td>
+              </Tr>
             ))}
-            {penginapan.length === 0 && (
-              <tr>
-                <td colSpan={4} className="py-4 text-neutral-500">
-                  Tidak ada pengajuan.
-                </td>
-              </tr>
-            )}
+            {penginapan.length === 0 && <EmptyRow colSpan={4}>Tidak ada pengajuan.</EmptyRow>}
           </tbody>
-        </table>
+        </Table>
       </section>
     </div>
   );

@@ -7,48 +7,87 @@ function formatRupiah(n: { toString(): string }) {
   );
 }
 
+const JENIS_LABEL: Record<string, string> = {
+  rafting: "Rafting",
+  river_tubing: "River Tubing",
+};
+
 export default async function KatalogPage() {
   const [jasa, kamar] = await Promise.all([CatalogService.listJasa(), CatalogService.listPenginapan()]);
 
   return (
-    <div className="mx-auto max-w-5xl py-12">
-      <h1 className="text-3xl font-semibold">Katalog Bammbo Rafting</h1>
-      <p className="mt-2 text-neutral-600">Rafting bambu, river tubing, dan penginapan di Loksado.</p>
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      <div className="max-w-2xl">
+        <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">Katalog Bammbo Rafting</h1>
+        <p className="mt-3 text-slate-500">
+          Pilih pengalaman rafting bambu, river tubing, dan penginapan terbaik di Loksado.
+        </p>
+      </div>
 
-      <section className="mt-10">
-        <h2 className="text-xl font-semibold">Jasa Rafting & Tubing</h2>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <section className="mt-12">
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold text-slate-900">Jasa Rafting & Tubing</h2>
+          <span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-teal-700">{jasa.length}</span>
+        </div>
+        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {jasa.map((p) => (
             <Link
               key={p.id}
               href={`/katalog/jasa/${p.id}`}
-              className="rounded-lg border p-4 hover:shadow-md transition"
+              className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
             >
-              <p className="text-xs uppercase text-emerald-700">{p.jenis === "rafting" ? "Rafting" : "River Tubing"}</p>
-              <h3 className="mt-1 font-medium">{p.nama}</h3>
-              <p className="text-sm text-neutral-500">{p.mitraJasa.namaUsaha}</p>
-              <p className="mt-2 font-semibold">{formatRupiah(p.hargaPerOrang)} / orang</p>
+              <div className="flex h-32 items-center justify-center bg-gradient-to-br from-teal-500 to-emerald-500 text-5xl">
+                {p.jenis === "rafting" ? "🚣" : "🛞"}
+              </div>
+              <div className="p-5">
+                <span className="text-xs font-semibold uppercase tracking-wide text-teal-600">
+                  {JENIS_LABEL[p.jenis] ?? p.jenis}
+                </span>
+                <h3 className="mt-1 font-semibold text-slate-900 group-hover:text-teal-700">{p.nama}</h3>
+                <p className="mt-1 text-sm text-slate-500">{p.mitraJasa.namaUsaha}</p>
+                <p className="mt-3 text-lg font-bold text-slate-900">
+                  {formatRupiah(p.hargaPerOrang)} <span className="text-sm font-normal text-slate-400">/ orang</span>
+                </p>
+              </div>
             </Link>
           ))}
-          {jasa.length === 0 && <p className="text-neutral-500">Belum ada produk jasa.</p>}
+          {jasa.length === 0 && (
+            <p className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white py-12 text-center text-slate-400">
+              Belum ada produk jasa.
+            </p>
+          )}
         </div>
       </section>
 
-      <section className="mt-10">
-        <h2 className="text-xl font-semibold">Penginapan</h2>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <section className="mt-14">
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold text-slate-900">Penginapan</h2>
+          <span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-teal-700">{kamar.length}</span>
+        </div>
+        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {kamar.map((k) => (
             <Link
               key={k.id}
               href={`/katalog/penginapan/${k.id}`}
-              className="rounded-lg border p-4 hover:shadow-md transition"
+              className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
             >
-              <h3 className="font-medium">{k.namaKamar}</h3>
-              <p className="text-sm text-neutral-500">{k.mitraPenginapan.namaUsaha}</p>
-              <p className="mt-2 font-semibold">{formatRupiah(k.hargaPerMalam)} / malam</p>
+              <div className="flex h-32 items-center justify-center bg-gradient-to-br from-amber-400 to-orange-400 text-5xl">
+                🏡
+              </div>
+              <div className="p-5">
+                <h3 className="font-semibold text-slate-900 group-hover:text-teal-700">{k.namaKamar}</h3>
+                <p className="mt-1 text-sm text-slate-500">{k.mitraPenginapan.namaUsaha}</p>
+                <p className="mt-3 text-lg font-bold text-slate-900">
+                  {formatRupiah(k.hargaPerMalam)} <span className="text-sm font-normal text-slate-400">/ malam</span>
+                </p>
+              </div>
             </Link>
           ))}
-          {kamar.length === 0 && <p className="text-neutral-500">Belum ada kamar penginapan.</p>}
+          {kamar.length === 0 && (
+            <p className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white py-12 text-center text-slate-400">
+              Belum ada kamar penginapan.
+            </p>
+          )}
         </div>
       </section>
     </div>

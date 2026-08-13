@@ -17,7 +17,7 @@ export function VerifikasiButtons({ jenis, mitraId }: { jenis: "jasa" | "pengina
         name="keputusan"
         value="AKTIF"
         disabled={pending}
-        className="rounded bg-emerald-700 px-3 py-1 text-xs text-white disabled:opacity-50"
+        className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-teal-700 disabled:opacity-50"
       >
         Setujui
       </button>
@@ -26,7 +26,7 @@ export function VerifikasiButtons({ jenis, mitraId }: { jenis: "jasa" | "pengina
         name="keputusan"
         value="REJECTED"
         disabled={pending}
-        className="rounded bg-red-600 px-3 py-1 text-xs text-white disabled:opacity-50"
+        className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-50"
       >
         Tolak
       </button>

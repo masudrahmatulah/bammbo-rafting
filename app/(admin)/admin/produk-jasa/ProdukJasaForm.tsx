@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { createProdukJasaAction, type ProdukJasaFormState } from "./actions";
+import { inputClass, btnPrimary } from "@/app/components/ui";
 
 const initialState: ProdukJasaFormState = {};
 
@@ -10,7 +11,7 @@ export function ProdukJasaForm({ mitraOptions }: { mitraOptions: { id: string; n
 
   return (
     <form action={formAction} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-      <select name="mitraJasaId" required className="rounded border px-3 py-2">
+      <select name="mitraJasaId" required className={inputClass}>
         <option value="">Pilih mitra jasa</option>
         {mitraOptions.map((m) => (
           <option key={m.id} value={m.id}>
@@ -18,14 +19,14 @@ export function ProdukJasaForm({ mitraOptions }: { mitraOptions: { id: string; n
           </option>
         ))}
       </select>
-      <select name="jenis" required className="rounded border px-3 py-2">
+      <select name="jenis" required className={inputClass}>
         <option value="rafting">Rafting</option>
         <option value="river_tubing">River Tubing</option>
       </select>
-      <input name="nama" placeholder="Nama produk" required className="rounded border px-3 py-2" />
-      <input name="hargaPerOrang" type="number" min="1" placeholder="Harga per orang" required className="rounded border px-3 py-2" />
-      <input name="kapasitasPerHari" type="number" min="1" placeholder="Kapasitas per hari" required className="rounded border px-3 py-2" />
-      <button type="submit" disabled={pending} className="rounded bg-emerald-700 px-4 py-2 text-white disabled:opacity-50">
+      <input name="nama" placeholder="Nama produk" required className={inputClass} />
+      <input name="hargaPerOrang" type="number" min="1" placeholder="Harga per orang" required className={inputClass} />
+      <input name="kapasitasPerHari" type="number" min="1" placeholder="Kapasitas per hari" required className={inputClass} />
+      <button type="submit" disabled={pending} className={btnPrimary}>
         {pending ? "Menyimpan..." : "Tambah Produk"}
       </button>
       {state.error && <p className="col-span-full text-sm text-red-600">{state.error}</p>}

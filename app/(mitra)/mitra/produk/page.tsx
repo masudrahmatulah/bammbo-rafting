@@ -4,6 +4,7 @@ import { MitraService } from "@/app/server/services/MitraService";
 import { MitraProdukService } from "@/app/server/services/MitraProdukService";
 import { ProdukJasaMitraForm } from "./ProdukJasaMitraForm";
 import { toggleOwnProdukJasaAction } from "./actions";
+import { PageHeader, Card, Table, Thead, Th, Tr, Td, EmptyRow, Badge, btnGhost } from "@/app/components/ui";
 
 export default async function MitraProdukPage() {
   const session = await requireMitraJasa();
@@ -14,45 +15,46 @@ export default async function MitraProdukPage() {
   const produk = await MitraProdukService.listOwnJasa(mitra.id);
 
   return (
-    <div className="mx-auto max-w-3xl py-12">
-      <h1 className="text-2xl font-semibold">Produk Jasa Saya</h1>
+    <div className="mx-auto max-w-3xl px-4 py-12">
+      <PageHeader title="Produk Jasa Saya" subtitle="Kelola produk rafting/tubing milik usaha Anda." />
 
-      <div className="mt-6 rounded-lg border p-4">
+      <Card className="mb-8">
         <ProdukJasaMitraForm />
-      </div>
+      </Card>
 
-      <table className="mt-8 w-full text-left text-sm">
-        <thead>
-          <tr className="border-b">
-            <th className="py-2">Nama</th>
-            <th>Jenis</th>
-            <th>Harga</th>
-            <th>Kapasitas</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
+      <Table>
+        <Thead>
+          <Th>Nama</Th>
+          <Th>Jenis</Th>
+          <Th>Harga</Th>
+          <Th>Kapasitas</Th>
+          <Th>Status</Th>
+          <Th>Aksi</Th>
+        </Thead>
         <tbody>
           {produk.map((p) => (
-            <tr key={p.id} className="border-b">
-              <td className="py-2">{p.nama}</td>
-              <td>{p.jenis}</td>
-              <td>{Number(p.hargaPerOrang).toLocaleString("id-ID")}</td>
-              <td>{p.kapasitasPerHari}</td>
-              <td>{p.aktif ? "Aktif" : "Nonaktif"}</td>
-              <td>
+            <Tr key={p.id}>
+              <Td className="font-medium text-slate-900">{p.nama}</Td>
+              <Td>{p.jenis === "rafting" ? "Rafting" : "River Tubing"}</Td>
+              <Td>{Number(p.hargaPerOrang).toLocaleString("id-ID")}</Td>
+              <Td>{p.kapasitasPerHari}</Td>
+              <Td>
+                <Badge tone={p.aktif ? "teal" : "slate"}>{p.aktif ? "Aktif" : "Nonaktif"}</Badge>
+              </Td>
+              <Td>
                 <form action={toggleOwnProdukJasaAction}>
                   <input type="hidden" name="produkId" value={p.id} />
                   <input type="hidden" name="aktif" value={String(p.aktif)} />
-                  <button type="submit" className="text-xs text-emerald-700 underline">
+                  <button type="submit" className={btnGhost}>
                     {p.aktif ? "Nonaktifkan" : "Aktifkan"}
                   </button>
                 </form>
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ))}
+          {produk.length === 0 && <EmptyRow colSpan={6}>Belum ada produk.</EmptyRow>}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
 }
