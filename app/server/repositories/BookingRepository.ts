@@ -105,12 +105,39 @@ export const BookingRepository = {
   listAllForAdmin() {
     return prisma.booking.findMany({
       include: {
-        user: { select: { name: true, email: true } },
-        items: true,
+        user: { select: { name: true, email: true, phone: true } },
+        items: {
+          include: {
+            produkJasa: { select: { nama: true } },
+            kamarPenginapan: { select: { namaKamar: true } },
+          },
+        },
         pembayaran: true,
       },
       orderBy: { createdAt: "desc" },
       take: 100,
+    });
+  },
+
+  listBookingItemsByMitraJasa(mitraJasaId: string) {
+    return prisma.bookingItem.findMany({
+      where: { produkJasa: { mitraJasaId } },
+      include: {
+        produkJasa: { select: { nama: true } },
+        booking: { select: { kodeBooking: true, tanggalMulai: true, tanggalSelesai: true, status: true, user: { select: { name: true, email: true, phone: true } } } },
+      },
+      orderBy: { booking: { createdAt: "desc" } },
+    });
+  },
+
+  listBookingItemsByMitraPenginapan(mitraPenginapanId: string) {
+    return prisma.bookingItem.findMany({
+      where: { kamarPenginapan: { mitraPenginapanId } },
+      include: {
+        kamarPenginapan: { select: { namaKamar: true } },
+        booking: { select: { kodeBooking: true, tanggalMulai: true, tanggalSelesai: true, status: true, user: { select: { name: true, email: true, phone: true } } } },
+      },
+      orderBy: { booking: { createdAt: "desc" } },
     });
   },
 };

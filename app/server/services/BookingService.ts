@@ -97,6 +97,14 @@ export const BookingService = {
     return BookingRepository.listAllForAdmin();
   },
 
+  listClientsForMitraJasa(mitraJasaId: string) {
+    return BookingRepository.listBookingItemsByMitraJasa(mitraJasaId);
+  },
+
+  listClientsForMitraPenginapan(mitraPenginapanId: string) {
+    return BookingRepository.listBookingItemsByMitraPenginapan(mitraPenginapanId);
+  },
+
   async cancelBooking(bookingId: string) {
     const booking = await prisma.booking.findUniqueOrThrow({ where: { id: bookingId } });
     if (booking.status !== "PENDING" && booking.status !== "CONFIRMED") {

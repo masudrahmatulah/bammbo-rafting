@@ -34,6 +34,8 @@ export default async function AdminTransaksiPage() {
         <Thead>
           <Th>Kode</Th>
           <Th>Wisatawan</Th>
+          <Th>Kontak</Th>
+          <Th>Item</Th>
           <Th>Tanggal</Th>
           <Th>Total</Th>
           <Th>Status</Th>
@@ -45,6 +47,15 @@ export default async function AdminTransaksiPage() {
             <Tr key={b.id}>
               <Td className="font-mono text-xs text-slate-500">{b.kodeBooking}</Td>
               <Td>{b.user.name}</Td>
+              <Td className="text-slate-600">
+                <div>{b.user.email}</div>
+                {b.user.phone && <div className="text-xs text-slate-400">{b.user.phone}</div>}
+              </Td>
+              <Td>
+                {b.items
+                  .map((it) => it.produkJasa?.nama ?? it.kamarPenginapan?.namaKamar ?? "-")
+                  .join(", ")}
+              </Td>
               <Td>{b.tanggalMulai.toLocaleDateString("id-ID")}</Td>
               <Td className="font-medium text-slate-900">{formatRupiah(b.totalHarga)}</Td>
               <Td>
@@ -63,7 +74,7 @@ export default async function AdminTransaksiPage() {
               </Td>
             </Tr>
           ))}
-          {bookings.length === 0 && <EmptyRow colSpan={7}>Belum ada transaksi.</EmptyRow>}
+          {bookings.length === 0 && <EmptyRow colSpan={9}>Belum ada transaksi.</EmptyRow>}
         </tbody>
       </Table>
     </div>
