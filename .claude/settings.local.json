@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Write-Output \"--- npm global ---\"; npm list -g --depth=0 2>&1 | Select-String -Pattern \"claude\"; Write-Output \"--- common paths ---\"; $paths = @\\(\"$env:APPDATA\\\\npm\\\\claude.cmd\",\"$env:LOCALAPPDATA\\\\Programs\\\\claude\\\\claude.exe\",\"$env:USERPROFILE\\\\.claude\\\\local\\\\claude.exe\",\"$env:USERPROFILE\\\\AppData\\\\Roaming\\\\npm\\\\claude\"\\); foreach \\($p in $paths\\) { if \\(Test-Path $p\\) { Write-Output \"FOUND: $p\" } else { Write-Output \"missing: $p\" } }; Write-Output \"--- PATH ---\"; $env:PATH -split ';' | Select-String -Pattern \"npm|claude|node\")"
+    ]
+  }
+}

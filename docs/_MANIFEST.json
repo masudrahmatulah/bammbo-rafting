@@ -1,0 +1,136 @@
+{
+  "app": {
+    "name": "Bammbo Rafting",
+    "description": "Platform booking online untuk jasa bamboo rafting, river tubing, dan penginapan di Loksado, Kabupaten Hulu Sungai Selatan, dengan model bagi hasil (revenue share) ke pemilik jasa dan pemilik penginapan sebagai mitra.",
+    "type": "greenfield"
+  },
+  "confirmed_at": "2026-08-12T10:00:00+08:00",
+  "requirements": {
+    "goal": "Menyatukan pemesanan bamboo rafting, river tubing, dan penginapan di Loksado dalam satu platform online dengan skema bagi hasil otomatis ke mitra",
+    "success_metric": "Jumlah transaksi booking sukses (lunas & terkonfirmasi) per bulan",
+    "features": [
+      { "name": "Registrasi & login wisatawan", "priority": "mvp" },
+      { "name": "Katalog jasa rafting/tubing & penginapan (browse, filter tanggal & jumlah orang)", "priority": "mvp" },
+      { "name": "Booking mandiri (self-service, konfirmasi instan setelah bayar)", "priority": "mvp" },
+      { "name": "Pembayaran online via Midtrans (VA/QRIS/e-wallet)", "priority": "mvp" },
+      { "name": "Paket gabungan rafting/tubing + penginapan (harga bundel)", "priority": "mvp" },
+      { "name": "Panel mitra: kelola ketersediaan, harga, lihat pendapatan sendiri", "priority": "mvp" },
+      { "name": "Panel admin: approve pendaftaran mitra, kelola master data, monitor booking", "priority": "mvp" },
+      { "name": "Mesin bagi hasil otomatis (hitung & catat porsi platform vs mitra per transaksi)", "priority": "mvp" },
+      { "name": "Riwayat booking & pendapatan mitra", "priority": "mvp" },
+      { "name": "Ulasan & rating pasca-trip", "priority": "later" },
+      { "name": "Payout otomatis ke rekening mitra via API", "priority": "later" },
+      { "name": "Notifikasi WhatsApp", "priority": "later" }
+    ],
+    "out_of_scope": [
+      "Aplikasi mobile native (Android/iOS) — web responsif dulu",
+      "Multi-bahasa — hanya Bahasa Indonesia di v1",
+      "Integrasi OTA pihak ketiga (Traveloka, Tiket.com, dll.)",
+      "Sistem refund/pembatalan otomatis — diproses manual oleh admin",
+      "Payout otomatis ke rekening mitra — pencairan manual oleh admin di MVP"
+    ],
+    "roles": [
+      { "name": "wisatawan", "can": ["browse katalog", "booking", "bayar via Midtrans", "lihat riwayat booking sendiri", "beri ulasan (pasca-MVP)"], "cannot": ["lihat data booking wisatawan lain", "ubah harga/ketersediaan"] },
+      { "name": "mitra_jasa", "can": ["kelola produk jasa (rafting/tubing) miliknya", "atur ketersediaan & harga", "lihat booking masuk untuk produknya", "lihat pendapatan & riwayat bagi hasil sendiri"], "cannot": ["lihat data mitra lain", "approve pendaftaran mitra", "ubah persentase bagi hasil"] },
+      { "name": "mitra_penginapan", "can": ["kelola kamar/unit penginapan miliknya", "atur ketersediaan & harga", "lihat booking masuk untuk propertinya", "lihat pendapatan & riwayat bagi hasil sendiri"], "cannot": ["lihat data mitra lain", "approve pendaftaran mitra", "ubah persentase bagi hasil"] },
+      { "name": "admin", "can": ["approve/tolak pendaftaran mitra baru", "kelola semua master data", "monitor semua booking & pembayaran", "kelola & cairkan bagi hasil", "kelola pengaduan/pembatalan manual"], "cannot": [] }
+    ],
+    "processes": [
+      {
+        "name": "Booking & pembayaran wisatawan",
+        "happy_path": "Wisatawan pilih produk (jasa/penginapan/paket gabungan) -> pilih tanggal & jumlah orang -> sistem cek ketersediaan -> checkout -> bayar via Midtrans -> webhook konfirmasi -> booking berstatus CONFIRMED -> notifikasi email ke wisatawan & mitra -> H-1 reminder email",
+        "failure": "Pembayaran gagal/timeout -> booking berstatus EXPIRED, slot dilepas kembali; slot penuh saat checkout -> wisatawan diminta pilih tanggal lain sebelum lanjut ke pembayaran"
+      },
+      {
+        "name": "Pendaftaran mitra baru",
+        "happy_path": "Calon mitra isi form pendaftaran (data usaha, produk, dokumen) -> status PENDING -> admin verifikasi -> admin approve -> akun mitra AKTIF, produk tampil di katalog",
+        "failure": "Admin tolak pendaftaran -> status REJECTED, mitra diberi catatan alasan, boleh ajukan ulang"
+      },
+      {
+        "name": "Perhitungan & pencairan bagi hasil",
+        "happy_path": "Booking CONFIRMED -> sistem hitung porsi platform vs mitra sesuai persentase -> catat di ledger BagiHasil berstatus PENDING -> setelah tanggal trip/menginap lewat, status jadi SIAP_CAIR -> admin proses transfer manual -> admin tandai CAIR",
+        "failure": "Booking dibatalkan sebelum tanggal trip -> entri BagiHasil terkait dibatalkan (VOID), tidak dicairkan"
+      }
+    ],
+    "entities": [
+      { "name": "User", "key_attrs": ["id", "name", "email", "phone", "password_hash", "role"], "relations": ["hasOne MitraJasa (jika role mitra_jasa)", "hasOne MitraPenginapan (jika role mitra_penginapan)", "hasMany Booking (sebagai wisatawan)"] },
+      { "name": "MitraJasa", "key_attrs": ["id", "user_id", "nama_usaha", "no_ktp_nib", "no_rekening", "status_verifikasi"], "relations": ["belongsTo User", "hasMany ProdukJasa"] },
+      { "name": "MitraPenginapan", "key_attrs": ["id", "user_id", "nama_usaha", "no_ktp_nib", "no_rekening", "status_verifikasi"], "relations": ["belongsTo User", "hasMany KamarPenginapan"] },
+      { "name": "ProdukJasa", "key_attrs": ["id", "mitra_jasa_id", "nama", "jenis", "harga_per_orang", "kapasitas_per_hari"], "relations": ["belongsTo MitraJasa", "hasMany BookingItem"] },
+      { "name": "KamarPenginapan", "key_attrs": ["id", "mitra_penginapan_id", "nama_kamar", "harga_per_malam", "kapasitas_kamar"], "relations": ["belongsTo MitraPenginapan", "hasMany BookingItem"] },
+      { "name": "Booking", "key_attrs": ["id", "user_id", "kode_booking", "tanggal_mulai", "tanggal_selesai", "status", "total_harga"], "relations": ["belongsTo User", "hasMany BookingItem", "hasOne Pembayaran"] },
+      { "name": "BookingItem", "key_attrs": ["id", "booking_id", "produk_jasa_id (nullable)", "kamar_penginapan_id (nullable)", "jumlah", "subtotal"], "relations": ["belongsTo Booking", "belongsTo ProdukJasa (opsional)", "belongsTo KamarPenginapan (opsional)"] },
+      { "name": "Pembayaran", "key_attrs": ["id", "booking_id", "midtrans_order_id", "metode", "status", "jumlah", "paid_at"], "relations": ["belongsTo Booking"] },
+      { "name": "BagiHasil", "key_attrs": ["id", "booking_item_id", "porsi_platform", "porsi_mitra", "status", "dicairkan_at"], "relations": ["belongsTo BookingItem"] },
+      { "name": "Ulasan", "key_attrs": ["id", "booking_item_id", "rating", "komentar"], "relations": ["belongsTo BookingItem"] }
+    ],
+    "sensitive_data": [
+      "Data pembayaran via Midtrans — tidak menyimpan detail kartu di server sendiri (PCI scope di sisi Midtrans)",
+      "No. rekening bank mitra untuk pencairan — dienkripsi at-rest",
+      "KTP/NIB mitra saat verifikasi pendaftaran — PII, akses terbatas admin",
+      "Email & no. HP wisatawan/mitra — PII, password di-hash (bcrypt/argon2)"
+    ],
+    "stack": {
+      "backend": "Next.js 15 (App Router) + TypeScript, API routes/Server Actions",
+      "frontend": "Next.js 15 + React 19 + Tailwind CSS",
+      "db": "PostgreSQL 16 via Prisma ORM",
+      "versions": { "next": "15", "react": "19", "typescript": "5", "prisma": "5", "node": "20 LTS" },
+      "forbidden": ["jQuery", "class component React (pakai function component + hooks)", "raw SQL string tanpa Prisma (kecuali migrasi terkontrol)"]
+    },
+    "architecture": {
+      "pattern": "Monolit modular berlapis — Route Handler/Server Action tipis, logika bisnis di Service layer (app/server/services), akses data lewat Prisma repository tipis",
+      "integrations": ["Midtrans (payment gateway + webhook)", "Object storage S3-compatible (foto produk/penginapan)", "Resend (email transaksional)"]
+    },
+    "environment": {
+      "os": "Linux (Vercel serverless) untuk app; PostgreSQL managed (Supabase/Neon)",
+      "services": ["PostgreSQL 16", "Object storage S3-compatible", "Resend (email)", "Midtrans Sandbox/Production"],
+      "commands": { "dev": "npm run dev", "build": "npm run build", "test": "npm run test", "migrate": "npx prisma migrate deploy", "migrate_dev": "npx prisma migrate dev", "seed": "npx prisma db seed" }
+    },
+    "testing": "Vitest untuk unit test (logika bagi hasil, validasi ketersediaan); Playwright untuk feature test alur kritikal (booking end-to-end + webhook pembayaran Midtrans, mocked)",
+    "security": [
+      "Semua input divalidasi dengan Zod di batas Server Action/API route",
+      "Rahasia (API key Midtrans, DB URL, secret NextAuth) hanya di .env, tidak pernah di-commit",
+      "Otorisasi per peran ditegakkan di middleware + pengecekan ulang di Service layer (defense in depth)",
+      "Rate limit di endpoint publik (registrasi, login, checkout)",
+      "Verifikasi signature webhook Midtrans wajib sebelum memproses status pembayaran"
+    ],
+    "acceptance": "Kriteria terima per fitur MVP dari user story (01), format Given/When/Then, per-fitur di 23",
+    "definition_of_done": "Kriteria terima terpenuhi + tes hijau + tanpa regresi + sesuai konvensi 12 + tak melanggar guardrail 20/21",
+    "change_policy": {
+      "git": "Branch per fitur (format: fitur/nama-singkat), dilarang commit langsung ke main, wajib code review sebelum merge",
+      "irreversible_ops": ["Migrasi destruktif (drop/alter kolom pembawa data)", "Hapus data booking/pembayaran/bagi hasil", "Perubahan persentase bagi hasil yang sudah berjalan", "Rilis ke production"],
+      "release_steps": ["Tes hijau (npm run test)", "Migrasi tervalidasi di staging", "Backup database", "Deploy ke production", "Smoke test alur booking+bayar", "Siap rollback (revert deploy + restore backup bila perlu)"]
+    }
+  },
+  "canonical_owners": {
+    "product_value": "00/01", "features": "01", "scope": "02", "roadmap": "03",
+    "domain_terms": "04", "roles": "05", "business_process": "06", "schema": "07",
+    "architecture": "08", "stack": "09", "dev_env": "10", "commands": "11",
+    "project_structure": "12", "testing": "13", "error_handling": "14",
+    "observability": "15", "landmines": "16", "repair_rules": "18", "guardrails": "20",
+    "security": "21", "change_policy": "22",
+    "definition_of_done": "24"
+  },
+  "referenced_by": {
+    "01": ["02","03","23"], "02": ["03","17","22","23","CLAUDE"], "03": [],
+    "04": ["06","07"], "05": ["06","21","23"], "06": ["23"],
+    "07": ["06","16","18","21","23"], "08": [], "09": ["08","10","CLAUDE"], "10": [],
+    "11": ["10","13","16","23","25","CLAUDE"], "12": ["CLAUDE"], "13": ["23","24"],
+    "14": ["16"], "15": ["16"], "16": ["18"], "18": ["17"], "20": ["24","CLAUDE"],
+    "21": ["06","20","22","23"], "22": ["25","CLAUDE"], "24": ["23","25"]
+  },
+  "collapsed": ["16", "17", "19"],
+  "landmines": [],
+  "assumptions": [
+    "Bahasa aplikasi: Indonesia saja (v1)",
+    "Persentase bagi hasil 15% platform / 85% mitra berlaku sama untuk mitra jasa maupun penginapan di v1; struktur data (BagiHasil, kolom persentase per mitra) sudah disiapkan agar bisa dibedakan per mitra pasca-MVP tanpa migrasi ulang",
+    "Pencairan dana ke mitra dilakukan manual oleh admin (transfer bank), bukan payout otomatis via API di MVP",
+    "Tidak ada sistem refund otomatis — pembatalan & refund diproses manual oleh admin",
+    "Notifikasi H-1 & konfirmasi booking lewat email dulu (WhatsApp API menyusul pasca-MVP)",
+    "Hosting: Vercel (Next.js) + Supabase/Neon (PostgreSQL) — bisa disesuaikan saat implementasi"
+  ],
+  "open_questions": [
+    "Nama resmi badan usaha/legal entity untuk kontrak bagi hasil dengan mitra",
+    "Detail SLA/waktu pencairan dana ke mitra (mis. H+3 setelah trip/menginap selesai)"
+  ]
+}
