@@ -79,6 +79,21 @@ export const BookingRepository = {
     return prisma.booking.findUnique({ where: { kodeBooking }, include: { items: true, pembayaran: true } });
   },
 
+  getBookingDetailForEmail(bookingId: string) {
+    return prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        user: { select: { name: true, email: true } },
+        items: {
+          include: {
+            produkJasa: { select: { nama: true } },
+            kamarPenginapan: { select: { namaKamar: true } },
+          },
+        },
+      },
+    });
+  },
+
   findPembayaranByOrderId(midtransOrderId: string) {
     return prisma.pembayaran.findUnique({ where: { midtransOrderId }, include: { booking: true } });
   },

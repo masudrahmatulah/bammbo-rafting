@@ -2,6 +2,7 @@ import { prisma } from "@/app/lib/prisma";
 import { BookingRepository } from "@/app/server/repositories/BookingRepository";
 import { MidtransService } from "@/app/server/services/MidtransService";
 import { BagiHasilService } from "@/app/server/services/BagiHasilService";
+import { EmailService } from "@/app/server/services/EmailService";
 import { logger } from "@/app/lib/logger";
 
 export const PembayaranService = {
@@ -76,6 +77,15 @@ export const PembayaranService = {
       await BookingRepository.updateBookingStatus(pembayaran.bookingId, "CONFIRMED");
       await BagiHasilService.createForBooking(pembayaran.bookingId);
       logger.info("booking_status_berubah", { bookingId: pembayaran.bookingId, status: "CONFIRMED" });
+
+      try {
+        await EmailService.sendBookingConfirmation(pembayaran.bookingId);
+      } catch (err) {
+        logger.error("email_konfirmasi_booking_gagal", {
+          bookingId: pembayaran.bookingId,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
     } else if (transaction_status === "pending") {
       await BookingRepository.updatePembayaranStatus(pembayaran.id, { status: "PENDING" });
     } else if (transaction_status === "expire") {
